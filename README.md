@@ -1,103 +1,103 @@
-# docker-workshop commands
+# Docker workshop
 
-## finding the version
-```
+Examples and commands for the Docker 101 workshop. The folders follow the order of the slides.
+
+| Folder | Slide | What you do |
+|---|---|---|
+| [01-hello-world](01-hello-world) | Demo 1: hello-world | Your first container |
+| [02-container-vs-image](02-container-vs-image) | Demo 2: where did my file go? | Container vs image, writable layer, volumes |
+| [03-nginx](03-nginx) | Dockerfile, Changes and Updates | Build your own image, push only the changed layer |
+| [04-volumes-networks](04-volumes-networks) | Data & networking | Ports, volumes, networks, bind mounts |
+| [05-compose](05-compose) | Docker Compose | Multiple containers with one file |
+| [06-multistage](06-multistage) | Multi-stage builds | Small images without build tools |
+| [07-multi-arch](07-multi-arch) | One image, multiple CPU architectures | amd64 and arm64 |
+| [08-security](08-security) | Security basics | Scanning and good habits |
+| [extra](extra) | | httpd, Apache on Ubuntu, figlet hello world |
+
+## Command cheat sheet
+
+### Version and info
+
+```bash
 docker --version
-```
-## downloading image
-If you need to pull an image from a docker repository (e.q. dockerhub). You can use the following example to download the Nginx webserver image.
-``` 
-docker pull nginx
+docker info
 ```
 
-## view images
-List all the docker images pulled on the system with image details such as TAG/IMAGE ID/SIZE etc.
+### Images
 
-```
-docker images
-```
-
-## run
-Run the docker image mentioned in the command. This command will create a docker container in which the nginx HTTP server will run.
-
-``` 
-docker run -it -d nginx
-```
--it means interactive terminal, debuginformation is logged in the current terminal
--d run as daemon, debuginformation is not logged in current terminal
-
-### what’s running?
-ps lists all the docker containers are running with container details.
-
-``` 
-docker ps
+```bash
+docker pull nginx:1.28-alpine         # download an image from a registry (Docker Hub)
+docker images                         # list local images
+docker rmi nginx:1.28-alpine          # remove an image
+docker history nginx:1.28-alpine      # show the layers of an image
 ```
 
+### Run containers
 
-ps -a
-List all the docker containers running/exited/stopped with container details.
-```
-docker ps -a
-```
-
-## logs
-Fetch all the console output from a container id running in daemon mode
-```
-docker logs 912902c51449
+```bash
+docker run hello-world                       # run, print, exit
+docker run -it ubuntu bash                   # interactive shell (-i input, -t terminal)
+docker run -d -p 8080:80 --name web nginx    # in the background, port 8080 on your machine -> 80 in the container
+docker run --rm -it ubuntu bash              # remove the container automatically when it stops
 ```
 
-## exec
-Access the docker container and run commands inside the container. I am accessing the apache server container in this example.
+- `-it`: interactive with a terminal, for when you want to type in the container.
+- `-d`: detached, the container runs in the background. Use `docker logs` to see its output.
+- `-p host:container`: publish a port. Without `-p` you cannot reach the container from your browser.
 
-``` 
-docker exec -it 912902c51449 bash
+### What is running?
+
+```bash
+docker ps                    # running containers
+docker ps -a                 # all containers, including stopped ones
+docker logs web              # output of a container
+docker logs -f web           # follow the output
+docker exec -it web sh       # open a shell in a running container (bash if the image has it)
+docker diff web              # what changed in the container's writable layer
 ```
 
-## removing container
-Remove the docker container with container id mentioned in the command.
+### Stop, start, remove containers
 
-```
-docker rm 912902c51449
-```
-
-## removing image
-Remove the docker image with the docker image id mentioned in the command
-
-```
-docker rmi nginx
+```bash
+docker stop web              # stop the container
+docker start web             # start the same container again
+docker start -ai web         # ... and attach to it interactively
+docker restart web           # stop + start
+docker rm web                # remove a stopped container
+docker rm -f web             # stop and remove in one go
+docker container prune       # remove all stopped containers
 ```
 
-## restart Docker
-Restart the docker container with container id mentioned in the command.
+### Build and share images
 
-```
-docker restart 912902c51449
-```
-
-## stopping Docker
-Stop a container with container id mentioned in the command.
-
-```
-docker stop 912902c51449
+```bash
+docker build -t myweb:0.1 .                  # build from the Dockerfile in this folder (the dot)
+docker login                                 # log in to Docker Hub
+docker tag myweb:0.1 user/myweb:0.1          # name it <dockerhub-user>/<repository>:<tag>
+docker push user/myweb:0.1                   # upload to Docker Hub
 ```
 
-## login
-Login into docker hub. You will be asked your docker hub credentials to log in.
+### Volumes and networks
 
-```
-docker login
+```bash
+docker volume create data
+docker run -it --rm -v data:/data ubuntu bash
+docker network create app-net
+docker run -d --name db --network app-net -e POSTGRES_PASSWORD=secret postgres:17
 ```
 
-## build
-Build a docker image from a dockerfile. 
-```
-docker build . -t tagname
-```
-We add the dot at the end to specify the current directory. Specify a tagname to identify your image.
+### Docker Compose
 
-## push
-Upload a docker image with the image name mentioned in the command on the dockerhub.
-
+```bash
+docker compose up -d
+docker compose ps
+docker compose logs -f
+docker compose down
 ```
-docker push tagname
+
+### Clean up everything you don't use
+
+```bash
+docker system df             # how much space do images, containers and volumes use?
+docker system prune          # remove stopped containers, unused networks and dangling images
 ```

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Multi-stage build</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f3f8fd; color: #1f2d3d;
+           display: grid; place-items: center; height: 100vh; margin: 0; }
+    .card { background: #fff; padding: 2rem 3rem; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,.1); text-align: center; }
+    h1 { color: #1d63ed; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Built in stage 1, served in stage 2</h1>
+    <p>Build time: {{BUILD_TIME}}</p>
+  </div>
+</body>
+</html>
